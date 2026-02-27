@@ -96,3 +96,18 @@ def store_packet(ts, src_ip, dst_ip, proto, sport, dport, size, raw):
     g_dst_ports.append(dport)
     g_sizes.append(size)
     g_raw_bytes.append(raw)
+
+
+# FUNCTION 4 — format_hex_dump
+
+def format_hex_dump(raw_bytes, bytes_per_row=16):
+    """Converts raw bytes into structured hex dump rows."""
+    rows = []
+    for offset in range(0, len(raw_bytes), bytes_per_row):
+        chunk      = raw_bytes[offset: offset + bytes_per_row]
+        addr       = f"{offset:04x}"
+        hex_part   = " ".join(f"{b:02x}" for b in chunk)
+        ascii_part = "".join(chr(b) if 32 <= b <= 126 else "." for b in chunk)
+        rows.append((addr, hex_part, ascii_part))
+    return rows
+

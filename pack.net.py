@@ -65,3 +65,11 @@ lbl_tcp     = None
 lbl_udp     = None
 lbl_icmp    = None
 lbl_other   = None
+
+
+# FUNCTION 1 — get_protocol_name
+
+def get_protocol_name(proto_num):
+    """Converts IP protocol number to a readable string."""
+    return {1: "ICMP", 6: "TCP", 17: "UDP"}.get(proto_num, "OTHER")
+

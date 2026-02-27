@@ -5,9 +5,8 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import sys
 
-# ─────────────────────────────────────────────────────────────
 # COLOURS
-# ─────────────────────────────────────────────────────────────
+
 BG      = "#0d1117"
 PANEL   = "#161b22"
 GREEN   = "#2ea043"
@@ -27,3 +26,42 @@ PROTO_COLORS = {
     "ICMP":  "#d29922",
     "OTHER": "#a371f7",
 }
+
+
+# GLOBAL STATE — parallel list custom data structure
+
+g_timestamps = []
+g_src_ips    = []
+g_dst_ips    = []
+g_protocols  = []
+g_src_ports  = []
+g_dst_ports  = []
+g_sizes      = []
+g_raw_bytes  = []
+
+g_total = 0
+g_tcp   = 0
+g_udp   = 0
+g_icmp  = 0
+g_other = 0
+
+is_sniffing    = False
+current_filter = "ALL"
+packet_limit   = 0
+iface          = None
+
+# GUI widget references
+root        = None
+tree        = None
+detail_text = None
+hex_text    = None
+btn_start   = None
+filter_var  = None
+iface_var   = None
+limit_var   = None
+lbl_state   = None
+lbl_total   = None
+lbl_tcp     = None
+lbl_udp     = None
+lbl_icmp    = None
+lbl_other   = None

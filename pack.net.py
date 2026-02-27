@@ -111,3 +111,14 @@ def format_hex_dump(raw_bytes, bytes_per_row=16):
         rows.append((addr, hex_part, ascii_part))
     return rows
 
+
+# ─────────────────────────────────────────────────────────────
+# FUNCTION 5 — clear_data
+# ─────────────────────────────────────────────────────────────
+def clear_data():
+    """Clears all captured packet data and resets counters."""
+    global g_total, g_tcp, g_udp, g_icmp, g_other
+    for lst in (g_timestamps, g_src_ips, g_dst_ips, g_protocols,
+                g_src_ports, g_dst_ports, g_sizes, g_raw_bytes):
+        lst.clear()
+    g_total = g_tcp = g_udp = g_icmp = g_other = 0

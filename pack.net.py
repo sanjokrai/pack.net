@@ -73,3 +73,26 @@ def get_protocol_name(proto_num):
     """Converts IP protocol number to a readable string."""
     return {1: "ICMP", 6: "TCP", 17: "UDP"}.get(proto_num, "OTHER")
 
+
+# FUNCTION 2 — get_ports
+
+def get_ports(packet):
+    """Extracts source and destination port numbers from a packet."""
+    if packet.haslayer(TCP):
+        return str(packet[TCP].sport), str(packet[TCP].dport)
+    if packet.haslayer(UDP):
+        return str(packet[UDP].sport), str(packet[UDP].dport)
+    return "---", "---"
+
+# FUNCTION 3 — store_packet
+
+def store_packet(ts, src_ip, dst_ip, proto, sport, dport, size, raw):
+    """Appends packet metadata into parallel lists (custom data structure)."""
+    g_timestamps.append(ts)
+    g_src_ips.append(src_ip)
+    g_dst_ips.append(dst_ip)
+    g_protocols.append(proto)
+    g_src_ports.append(sport)
+    g_dst_ports.append(dport)
+    g_sizes.append(size)
+    g_raw_bytes.append(raw)

@@ -112,9 +112,8 @@ def format_hex_dump(raw_bytes, bytes_per_row=16):
     return rows
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 5 — clear_data
-# ─────────────────────────────────────────────────────────────
 def clear_data():
     """Clears all captured packet data and resets counters."""
     global g_total, g_tcp, g_udp, g_icmp, g_other
@@ -122,3 +121,169 @@ def clear_data():
                 g_src_ports, g_dst_ports, g_sizes, g_raw_bytes):
         lst.clear()
     g_total = g_tcp = g_udp = g_icmp = g_other = 0
+
+
+# FUNCTION 6 — process_packet
+
+def process_packet(packet):
+    """Scapy callback — extracts metadata, stores it, updates GUI."""
+    global g_total, g_tcp, g_udp, g_icmp, g_other, is_sniffing
+
+    if not packet.haslayer(IP):
+        return
+
+    ts           = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+    src          = packet[IP].src
+    dst          = packet[IP].dst
+    proto        = get_protocol_name(packet[IP].proto)
+    sport, dport = get_ports(packet)
+    size         = len(packet)
+    raw          = bytes(packet)
+
+    store_packet(ts, src, dst, proto, sport, dport, size, raw)
+    g_total += 1
+
+    if proto == "TCP":    g_tcp   += 1
+    elif proto == "UDP":  g_udp   += 1
+    elif proto == "ICMP": g_icmp  += 1
+    else:                 g_other += 1
+
+    root.after(0, add_packet_row, len(g_timestamps) - 1)
+    root.after(0, update_stats)
+
+    if packet_limit > 0 and g_total >= packet_limit:
+        is_sniffing = False
+        root.after(0, set_stopped_state)
+
+# FUNCTION 7 — run_sniff
+
+def run_sniff(iface_name):
+    """Runs Scapy sniff() in a background daemon thread."""
+    try:
+        sniff(iface=iface_name, prn=process_packet,
+              store=False, stop_filter=lambda _: not is_sniffing)
+    except Exception as e:
+        root.after(0, lambda: messagebox.showerror(
+            "Error", f"{e}\n\nRun as Administrator / sudo."))
+        root.after(0, set_stopped_state)
+
+# FUNCTION 8 — toggle_capture
+# ─────────────────────────────────────────────────────────────
+def toggle_capture():
+    """Starts or stops packet capture."""
+    global is_sniffing, iface, packet_limit
+
+    if is_sniffing:
+        is_sniffing = False
+        set_stopped_state()
+        return
+
+    iface_val = iface_var.get().strip()
+    iface = iface_val if iface_val else None
+    try:
+        packet_limit = int(limit_var.get().strip() or "0")
+    except ValueError:
+        packet_limit = 0
+
+    is_sniffing = True
+    btn_start.config(text="■  STOP", bg=RED, fg="black")
+    lbl_state.config(text="● CAPTURING", fg=GREEN)
+
+    threading.Thread(target=run_sniff, args=(iface,), daemon=True).start()
+
+    # FUNCTION 9 — set_stopped_state
+
+def set_stopped_state():
+    """Resets GUI controls after capture stops."""
+    btn_start.config(text="▶  START", bg=GREEN, fg="black")
+    lbl_state.config(text="● IDLE", fg=DIM)
+
+    # FUNCTION 10 — on_filter_change
+
+def on_filter_change(event=None):
+    """Updates filter and rebuilds the packet table."""
+    global current_filter
+    current_filter = filter_var.get()
+    tree.delete(*tree.get_children())
+    for i in range(len(g_protocols)):
+        add_packet_row(i)
+
+# FUNCTION 11 — on_clear
+
+def on_clear():
+    """Clears all data after user confirmation."""
+    if messagebox.askyesno("Clear", f"Clear {g_total} captured packets?"):
+        clear_data()
+        tree.delete(*tree.get_children())
+        update_stats()
+        for w in (detail_text, hex_text):
+            w.config(state="normal")
+            w.delete("1.0", "end")
+            w.config(state="disabled")
+
+
+# FUNCTION 12 — on_packet_select
+
+def on_packet_select(event=None):
+    """Shows details and hex dump for the selected packet."""
+    selected = tree.selection()
+    if not selected:
+        return
+    idx = int(tree.item(selected[0])["values"][0]) - 1
+    show_detail(idx)
+
+
+# FUNCTION 13 — add_packet_row
+
+def add_packet_row(idx):
+    """Adds one packet row to the table if it matches the filter."""
+    proto = g_protocols[idx]
+    if current_filter != "ALL" and proto != current_filter:
+        return
+    src = f"{g_src_ips[idx]}:{g_src_ports[idx]}"
+    dst = f"{g_dst_ips[idx]}:{g_dst_ports[idx]}"
+    tree.insert("", "end",
+                values=(idx + 1, g_timestamps[idx],
+                        src, dst, proto, f"{g_sizes[idx]}B"),
+                tags=(proto,))
+    tree.yview_moveto(1)
+
+    # FUNCTION 14 — update_stats
+
+def update_stats():
+    """Updates all stat labels in the sidebar."""
+    lbl_total.config(text=f"Total:  {g_total:,}")
+    lbl_tcp.config(text=f"TCP:    {g_tcp:,}")
+    lbl_udp.config(text=f"UDP:    {g_udp:,}")
+    lbl_icmp.config(text=f"ICMP:   {g_icmp:,}")
+    lbl_other.config(text=f"Other:  {g_other:,}")
+
+
+
+# FUNCTION 15 — show_detail
+
+def show_detail(idx):
+    """Displays metadata and hex dump for a selected packet."""
+    info = (
+        f"Packet  : #{idx + 1}\n"
+        f"Time    : {g_timestamps[idx]}\n"
+        f"Proto   : {g_protocols[idx]}\n"
+        f"Source  : {g_src_ips[idx]}:{g_src_ports[idx]}\n"
+        f"Dest    : {g_dst_ips[idx]}:{g_dst_ports[idx]}\n"
+        f"Size    : {g_sizes[idx]} bytes\n"
+    )
+    detail_text.config(state="normal")
+    detail_text.delete("1.0", "end")
+    detail_text.insert("end", info)
+    detail_text.config(state="disabled")
+
+    rows = format_hex_dump(g_raw_bytes[idx])
+    lines = ["OFFSET   HEX                                                ASCII\n",
+             "-" * 65 + "\n"]
+    for addr, hex_part, ascii_part in rows:
+        lines.append(f"{addr}   {hex_part:<48}  {ascii_part}\n")
+
+    hex_text.config(state="normal")
+    hex_text.delete("1.0", "end")
+    hex_text.insert("end", "".join(lines))
+    hex_text.config(state="disabled")

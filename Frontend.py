@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import sys
 
-import Backend
+import backend
 
 # ─────────────────────────────────────────────────────────────
 # COLOURS

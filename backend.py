@@ -26,17 +26,17 @@ packet_limit   = 0
 iface          = None
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 1 — get_protocol_name
-# ─────────────────────────────────────────────────────────────
+
 def get_protocol_name(proto_num):
     """Converts IP protocol number to a readable string."""
     return {1: "ICMP", 6: "TCP", 17: "UDP"}.get(proto_num, "OTHER")
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 2 — get_ports
-# ─────────────────────────────────────────────────────────────
+
 def get_ports(packet):
     """Extracts source and destination port numbers from a packet."""
     if packet.haslayer(TCP):
@@ -46,9 +46,8 @@ def get_ports(packet):
     return "---", "---"
 
 
-# ─────────────────────────────────────────────────────────────
 # FUNCTION 3 — store_packet
-# ─────────────────────────────────────────────────────────────
+
 def store_packet(ts, src_ip, dst_ip, proto, sport, dport, size, raw):
     """Appends packet metadata into parallel lists (custom data structure)."""
     g_timestamps.append(ts)
@@ -61,9 +60,9 @@ def store_packet(ts, src_ip, dst_ip, proto, sport, dport, size, raw):
     g_raw_bytes.append(raw)
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 4 — format_hex_dump
-# ─────────────────────────────────────────────────────────────
+
 def format_hex_dump(raw_bytes, bytes_per_row=16):
     """Converts raw bytes into structured hex dump rows."""
     rows = []
@@ -76,9 +75,9 @@ def format_hex_dump(raw_bytes, bytes_per_row=16):
     return rows
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 5 — clear_data
-# ─────────────────────────────────────────────────────────────
+
 def clear_data():
     """Clears all captured packet data and resets counters."""
     global g_total, g_tcp, g_udp, g_icmp, g_other
@@ -88,9 +87,9 @@ def clear_data():
     g_total = g_tcp = g_udp = g_icmp = g_other = 0
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 6 — process_packet
-# ─────────────────────────────────────────────────────────────
+
 def process_packet(packet):
     """Scapy callback — extracts metadata, stores it, updates GUI."""
     global g_total, g_tcp, g_udp, g_icmp, g_other, is_sniffing
@@ -124,9 +123,9 @@ def process_packet(packet):
             _gui_on_stop()
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 7 — run_sniff
-# ─────────────────────────────────────────────────────────────
+
 def run_sniff(iface_name):
     """Runs Scapy sniff() in a background daemon thread."""
     try:
@@ -139,9 +138,9 @@ def run_sniff(iface_name):
             _gui_on_stop()
 
 
-# ─────────────────────────────────────────────────────────────
+
 # GUI CALLBACK HOOKS — set by frontend.py at startup
-# ─────────────────────────────────────────────────────────────
+
 _gui_on_packet = None   # called with packet index after each capture
 _gui_on_stop   = None   # called when capture stops
 _gui_on_error  = None   # called with error message string
@@ -155,9 +154,9 @@ def register_gui_callbacks(on_packet=None, on_stop=None, on_error=None):
     _gui_on_error  = on_error
 
 
-# ─────────────────────────────────────────────────────────────
+
 # CAPTURE CONTROL — called by frontend toggle_capture()
-# ─────────────────────────────────────────────────────────────
+
 def start_capture(iface_name, limit):
     """Sets capture state and launches background sniff thread."""
     global is_sniffing, iface, packet_limit

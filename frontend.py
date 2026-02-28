@@ -4,9 +4,9 @@ import sys
 
 import backend
 
-# ─────────────────────────────────────────────────────────────
+
 # COLOURS
-# ─────────────────────────────────────────────────────────────
+
 BG      = "#0d1117"
 PANEL   = "#161b22"
 GREEN   = "#2ea043"
@@ -44,9 +44,9 @@ lbl_icmp    = None
 lbl_other   = None
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 8 — toggle_capture
-# ─────────────────────────────────────────────────────────────
+
 def toggle_capture():
     """Starts or stops packet capture."""
     if backend.is_sniffing:
@@ -66,18 +66,17 @@ def toggle_capture():
     backend.start_capture(iface_val, limit)
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 9 — set_stopped_state
-# ─────────────────────────────────────────────────────────────
 def set_stopped_state():
     """Resets GUI controls after capture stops."""
     btn_start.config(text="▶  START", bg=GREEN, fg="black")
     lbl_state.config(text="● IDLE", fg=DIM)
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 10 — on_filter_change
-# ─────────────────────────────────────────────────────────────
+
 def on_filter_change(event=None):
     """Updates filter and rebuilds the packet table."""
     backend.current_filter = filter_var.get()
@@ -86,9 +85,9 @@ def on_filter_change(event=None):
         add_packet_row(i)
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 11 — on_clear
-# ─────────────────────────────────────────────────────────────
+
 def on_clear():
     """Clears all data after user confirmation."""
     if messagebox.askyesno("Clear", f"Clear {backend.g_total} captured packets?"):
@@ -101,9 +100,9 @@ def on_clear():
             w.config(state="disabled")
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 12 — on_packet_select
-# ─────────────────────────────────────────────────────────────
+
 def on_packet_select(event=None):
     """Shows details and hex dump for the selected packet."""
     selected = tree.selection()
@@ -113,9 +112,8 @@ def on_packet_select(event=None):
     show_detail(idx)
 
 
-# ─────────────────────────────────────────────────────────────
 # FUNCTION 13 — add_packet_row
-# ─────────────────────────────────────────────────────────────
+
 def add_packet_row(idx):
     """Adds one packet row to the table if it matches the filter."""
     proto = backend.g_protocols[idx]
@@ -130,9 +128,9 @@ def add_packet_row(idx):
     tree.yview_moveto(1)
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 14 — update_stats
-# ─────────────────────────────────────────────────────────────
+
 def update_stats():
     """Updates all stat labels in the sidebar."""
     lbl_total.config(text=f"Total:  {backend.g_total:,}")
@@ -142,9 +140,9 @@ def update_stats():
     lbl_other.config(text=f"Other:  {backend.g_other:,}")
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 15 — show_detail
-# ─────────────────────────────────────────────────────────────
+
 def show_detail(idx):
     """Displays metadata and hex dump for a selected packet."""
     info = (
@@ -172,9 +170,9 @@ def show_detail(idx):
     hex_text.config(state="disabled")
 
 
-# ─────────────────────────────────────────────────────────────
+
 # GUI CALLBACK HANDLERS — passed to backend via register_gui_callbacks()
-# ─────────────────────────────────────────────────────────────
+
 def _on_packet(idx):
     """Scheduled on main thread: adds row and refreshes stats."""
     root.after(0, add_packet_row, idx)
@@ -192,9 +190,9 @@ def _on_error(msg):
         "Error", f"{msg}\n\nRun as Administrator / sudo."))
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 16 — build_header
-# ─────────────────────────────────────────────────────────────
+
 def build_header(parent):
     """Builds a clean title banner at the top."""
     hdr = tk.Frame(parent, bg=PANEL, pady=10)
@@ -212,9 +210,9 @@ def build_header(parent):
     tk.Frame(parent, bg=GREEN, height=1).pack(fill="x")
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 17 — build_toolbar
-# ─────────────────────────────────────────────────────────────
+
 def build_toolbar(parent):
     """Builds the controls toolbar below the header."""
     global btn_start, filter_var, iface_var, limit_var, lbl_state
@@ -291,9 +289,9 @@ def _sep(parent):
              font=(MONO, 9)).pack(side="left", padx=6)
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 18 — build_stats_panel
-# ─────────────────────────────────────────────────────────────
+
 def build_stats_panel(parent):
     """Builds the left stats sidebar."""
     global lbl_total, lbl_tcp, lbl_udp, lbl_icmp, lbl_other
@@ -321,9 +319,9 @@ def build_stats_panel(parent):
         lbl.pack(fill="x", padx=12, pady=2)
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 19 — build_packet_table
-# ─────────────────────────────────────────────────────────────
+
 def build_packet_table(parent):
     """Builds the main scrollable packet list table."""
     global tree
@@ -366,9 +364,9 @@ def build_packet_table(parent):
     tree.bind("<<TreeviewSelect>>", on_packet_select)
 
 
-# ─────────────────────────────────────────────────────────────
+
 # FUNCTION 20 — build_detail_panel
-# ─────────────────────────────────────────────────────────────
+
 def build_detail_panel(parent):
     """Builds the bottom detail and hex dump panels."""
     global detail_text, hex_text
@@ -409,9 +407,9 @@ def build_detail_panel(parent):
     hex_text.pack(fill="both", expand=True, padx=6, pady=4)
 
 
-# ─────────────────────────────────────────────────────────────
+
 # MAIN
-# ─────────────────────────────────────────────────────────────
+
 def main():
     """Main entry point — builds the GUI and starts the event loop."""
     global root

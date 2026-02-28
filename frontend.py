@@ -202,8 +202,8 @@ def build_header(parent):
              font=(MONO, 22, "bold"),
              fg=GREEN, bg=PANEL).pack()
 
-    tk.Label(hdr, text="Network Packet Analyzer  ·  ST4017CMD  ·  Ethical Hacking & Cybersecurity",
-             font=(MONO, 8),
+    tk.Label(hdr, text=" Network Packet Analyzer | Ethical Hacking & Cybersecurity Tool",
+             font=(MONO, 10),
              fg=DIM, bg=PANEL).pack()
 
     # green divider line
@@ -440,5 +440,4 @@ def main():
     root.mainloop()
 
 
-if __name__ == "__main__":
-    main()
+main()
